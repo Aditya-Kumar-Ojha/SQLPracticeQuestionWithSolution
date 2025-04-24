@@ -1,0 +1,252 @@
+Link for the table:https://www.programiz.com/sql/online-compiler, where there is three table customers, orders and shipping , 
+
+Below is 50 interview SQL question that will cover all the SQL concept 
+
+🔍 Basic SELECT Queries
+--Retrieve all customers.
+  Select * from customers
+
+--List all orders with their item names and amounts.
+  Select order_id,item,amount from orders
+
+--Show all customers from 'USA'.
+  Select * from customers where country like 'USA%'
+
+--Display customers who are older than 25.
+  Select * from customers where age>25
+
+--Find all orders with an amount greater than 100.
+  Select orders.* from Orders where amount>100
+
+--Select distinct countries from the Customers table.
+  Select distinct country from customers 
+
+--Retrieve the top 4 most expensive orders.
+  Select distinct amount from orders 
+  order by amount DESC
+  limit 4
+---Show customers with age between 20 and 30.
+   Select customers.first_name || ' ' || customers.last_name as Full_Name, age  from customers where age between 20 and 30; 
+
+-- Sort customers by last name and first name alphabetically
+   Select *  from customers order by last_name, First_name DESC
+
+---Find orders where the item name starts with 'S'.
+   Select * from orders where item like 'K%'
+  
+🔗 JOIN Operations
+---Show orders along with the full name of the customer who placed them.
+   Select order_id,item,amount,orders.customer_id,Customers.first_name || ' ' || Customers.last_name as full_name 
+       from orders left join Customers 
+       on orders.order_id=Customers.customer_id
+
+---List all orders with customer country.
+   Select order_id,item,amount,orders.customer_id,Customers.country
+   from orders left join Customers 
+   on orders.order_id=Customers.customer_id
+
+--Retrieve shipping status for each customer’s full name.
+  Select status, Customers.first_name || ' ' || Customers.last_name as Full_name
+  from Shippings left join Customers 
+  on Shippings.shipping_id=Customers.customer_id
+
+---Find customers who have placed at least one order.
+   SELECT DISTINCT Customers.*
+   FROM Customers
+   JOIN Orders ON Customers.customer_id = Orders.customer_id;
+
+   SELECT  Customers.*
+    FROM Customers where EXISTS (SELECT *
+    FROM Orders
+    WHERE Orders.customer_id = Customers.customer_id); 
+
+--List customers who haven't placed any orders.
+
+   SELECT  Customers.*
+   FROM Customers 
+   where not EXISTS (SELECT * FROM Orders WHERE Orders.customer_id = Customers.customer_id); 
+	
+--Display orders and their corresponding shipping status.
+   SELECT order_id,item,amount,status,Orders.customer_id from orders 
+   Left Join Shippings on Orders.order_id=Shippings.shipping_id
+   
+--Join all three tables to show order details along with shipping status and customer name.
+   SELECT order_id,item,amount,status,Orders.customer_id,Customers.first_name  || ' '|| Customers.last_name as Full_name  from orders 
+   Left Join Shippings on Orders.order_id=Shippings.shipping_id
+   Left Join Customers on Orders.order_id=Customers.customer_id;
+  
+---List customers and the total number of orders they placed.
+
+  SELECT customers.first_name || ' ' || customers.last_name as Full_name, count(orders.customer_id) as TotalNoOfOrders from orders 
+  Left join customers on orders.order_id = customers.customer_id
+  group by Orders.customer_id
+  order by TotalNoOfOrders DESC;
+
+---Show customers with their latest order (use MAX on order_id or date if available).
+
+  SELECT customers.first_name || ' ' || customers.last_name as Full_name, orders.* from orders 
+  Left join customers on orders.order_id = customers.customer_id
+  group by Orders.customer_id
+  order by order_id DESC;
+  
+Retrieve all orders that have no corresponding shipping info.
+
+  SELECT orders.* FROM ORDERS WHERE not EXISTS (SELECT * FROM Shippings
+  WHERE Orders.order_id = Shippings.shipping_id); 
+  
+📊 Aggregation and GROUP BY
+---Count total number of customers.
+
+Select count(customer_id) as TotalNoOFCustomers from Customers
+
+--Calculate average age of customers.
+
+Select avg(age) as averageOFCustomers from Customers
+
+--Get the total number of orders placed.
+Select count(order_id) as TotalNoOFOrders from Orders
+
+--Find the total amount spent by each customer.
+
+Select customers.first_name || ' ' || customers.last_name as Full_name,sum(amount)  TotalAmount  From Customers
+Left Join Orders on customers.customer_id = Orders.customer_id
+Group by Orders.customer_id
+order by totalAmount DESC;
+
+
+---Show the number of orders per country.
+
+Select country, count(Orders.customer_id) as NumberOfOrders  From Customers
+Left Join Orders on customers.customer_id = Orders.customer_id
+Group by country
+order by country DESC;
+
+--Display average order amount per customer.
+
+Select Customers.first_name || ' ' || Customers.last_name as Full_name, avg(amount) As averageOrderAmount from Customers Left Join Orders on Customers.customer_id = Orders.customer_id
+Group By  Full_name
+Order by averageOrderAmount DESC;
+
+
+--Count how many customers are there in each country.
+
+Select Count(Customers.first_name || ' ' || Customers.last_name) as NoOFCustomers, country From Customers
+Group By  country
+Order by country DESC;
+
+--List total revenue (SUM of amount) from all orders.
+Select Sum(amount) As TotalRevenue from Orders
+
+--Show customers who spent more than 500 in total.
+
+Select Customers.first_name || ' ' || Customers.last_name as Full_name, sum(amount) from Customers Left Join Orders ON Customers.customer_id=Orders.customer_id 
+group by Full_name
+Having sum(amount)>500;
+
+---Find the highest single order amount for each customer.
+
+Select customer_id, Max(amount) from Orders 
+Group by customer_id;
+
+🧩 Subqueries
+--Find customers who spent more than the average order amount.
+Select customer_id from Orders where amount> (select avg(amount) from Orders);
+
+-- Get all customers who have equal to 1 or  more than 1 order.
+  select customer_id,Count(customer_id) from orders group by customer_id having Count(customer_id)>=1 order by Count(customer_id) DESC;
+
+--Find customers who placed the cheapest order.
+Select customer_id from orders where amount = (Select min(amount) from Orders)
+
+List items that have been ordered more than once.
+
+select count(item), item from orders group by item having count(item)>1 order by count(item) desc
+
+Show customers whose total order amount is below the average total per customer.
+
+WITH customer_totals AS (
+    SELECT 
+        customer_id,
+        SUM(amount) AS total_order_amount
+    FROM 
+        Orders
+    GROUP BY 
+        customer_id
+),
+average_total AS (
+    SELECT 
+        AVG(total_order_amount) AS avg_order_amount
+    FROM 
+        customer_totals
+)
+SELECT 
+    c.customer_id,
+    c.first_name,
+    c.last_name,
+    ct.total_order_amount
+FROM 
+    customer_totals ct
+JOIN 
+    average_total at ON 1=1
+JOIN 
+    Customers c ON c.customer_id = ct.customer_id
+WHERE 
+    ct.total_order_amount < at.avg_order_amount;
+	
+🧪 Advanced Filtering / Conditions
+--Retrieve orders placed by customers from 'Germany' or 'France'.
+
+SELECT orders.* from orders Left join Customers on Customers.customer_id=Orders.customer_id where country like 'USA%' or country like 'UK%';
+
+----- Find orders with item names containing the word 'Pro'.
+SELECT orders.* from orders where item like '%Mou%';
+
+---Display all customers whose first name is 5 characters long.
+   SELECT Customers.* from Customers where length(first_name) >= 5 ;
+---Retrieve customers whose last name ends with 'son'.
+   SELECT Customers.* from Customers where last_name like '%son' ;
+---Find customers who haven’t received their shipping (status ≠ 'Delivered').
+ SELECT status,Customers.* from Customers join Shippings on customers.customer_id =Shippings.customer where status != 'Delivered';
+ 
+🧮 Window Functions / Ranking
+Rank orders by amount for each customer.
+SELECT 
+    o.order_id,
+    o.customer_id,
+    o.item,
+    o.amount,
+    DENSE_RANK()  OVER (PARTITION BY o.customer_id ORDER BY o.amount DESC) AS rank_by_amount
+FROM 
+    Orders o;
+	
+Show cumulative amount spent by each customer (running total).
+
+Assign row numbers to each order per customer.
+
+Find the first order placed by each customer.
+
+⚙️ Data Manipulation (DML)
+---Write a query to insert a new customer.
+   insert into Customers (customer_id,first_name,last_name,age,country)
+     values (6,'Aditya','Ojha',28,'India'),
+        (7,'Raushan','Kumar',30,'India');
+---Update the status of a shipping to 'Delivered' where it's currently 'Pending'.
+   Update Shippings set status='Delivered' where status='Pending'
+---Delete orders with amount less than 10.
+    Delete from Orders where amount < 251
+---Change the country of all customers from 'UK' to 'United Kingdom'.
+   update Customers set country= 'United Kingdom' where country='UK';
+-- Add a new column email to the Customers table (DDL).
+Alter table Customers add email varchar(255) 
+--Delete all records of customers who have no orders or shipments.
+DELETE FROM Customers
+WHERE customer_id NOT IN (SELECT customer_id FROM Orders)
+  and  customer_id NOT IN (SELECT customer_id FROM Shippings);
+  
+--Find out the max salary from each depart  form employee TABLE
+Select e.*, Max(Salary) Over(partition by dept_name) as max_salary from employee e;
+
+-- fetch the first 2 employeed from each department to join the company .
+
+  select e.*, row_number () over (partition by dept_name order by emp_id) as rn from employee e;
+
