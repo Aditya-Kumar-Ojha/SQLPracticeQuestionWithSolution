@@ -1,0 +1,276 @@
+🔹 Section 1: Basic SELECT Queries
+---Select all customers.
+   Select * from customers
+-- first and last names of customers from a specific country.
+  Select first_name, Last_name  from customers where country ='USA'
+--Find all orders made by a specific customer ID.
+  Select orders.* from orders where customer_id='4'
+--Get distinct countries from the Customers table.
+  select distinct country from customers 
+--Count the total number of customers.
+  SELECT count(*) from customers
+--Count the number of unique items ordered.
+  SELECT count(distinct item) from Orders
+--List all shipments with status "Delivered".
+  SELECT * from shippings where status='Delivered'
+--Show customers aged over 30.
+  Select * from customers where age>30
+--Show all orders with amount greater than 500.
+  Select * from orders where amount>500
+--List the full name of customers (combine first and last name).
+  Select first_name || ' ' || Last_name as Full_name from customers
+🔹 Section 2: JOINs
+--List all orders along with the customer name.
+  Select Orders.*,customers.* from Orders Left Join Customers
+ON Orders.order_id= Customers.customer_id;
+
+--Show each shipment along with the customer's country.
+  Select Customers.country,shippings.* from shippings Left join Customers on Shippings.shipping_id=Customers.customer_id;
+--Get a list of customers and their order amounts (if any).
+  Select Customers.*,amount from Customers Left join Orders on Customers.customer_id=Orders.customer_id;
+--Find customers who have both orders and shippings.
+     Select Distinct customers.customer_id,first_name||' '||Last_name as full_name from customers  Join orders on Customers.customer_id = Orders.customer_id 
+   Join shippings on customers.customer_id = Shippings.customer;
+--List customers who have only orders but no shipments.
+    Select Distinct customers.customer_id,first_name||' '||Last_name as full_name from customers  Join orders on Customers.customer_id = Orders.customer_id 
+  Left Join shippings on customers.customer_id = Shippings.customer where shippings.customer is Null;
+--List customers who have only shipments but no orders.
+   Select Distinct customers.customer_id, first_name, Last_name from customers join shippings on Customers.customer_id = shippings.customer left join Orders on customers.customer_id = orders.customer_id where orders.customer_id is Null;
+--Get customers with both order and shipping information in a single row.
+ SELECT 
+  c.customer_id,
+  c.first_name,
+  c.last_name,
+  c.country,
+  o.order_id,
+  o.item,
+  o.amount,
+  s.shipping_id,
+  s.status
+  From Customers as c
+  JOIN orders as o on c.customer_id = o.customer_id
+  JOIN shippings as s ON c.customer_id = s.customer;
+--Show orders with corresponding shipping status, if available.
+  SELECT order_id,item,amount,status 
+  FROM orders 
+  JOIN shippings ON orders.customer_id = shippings.customer; 
+--Display all customers with their latest shipment status.
+  SELECT first_name,last_name,age,country,status 
+  FROM Customers 
+  JOIN Shippings ON Customers.customer_id = Shippings.customer
+--Find all combinations of customer name, item ordered, and shipping status.
+  SELECT first_name||' '|| last_name as full_name,age,country,status,item,amount 
+  FROM Customers 
+  JOIN Shippings ON Customers.customer_id = Shippings.customer
+  JOIN Orders ON Customers.customer_id = Orders.customer_id;
+🔹 Section 3: Aggregation & GROUP BY 
+---Find the total order amount for each customer.
+    SELECT Orders.customer_id,first_name||' '|| last_name as full_name,age,country,sum(amount) 
+    FROM Customers 
+    JOIN Orders ON Customers.customer_id = Orders.customer_id
+    group by orders.customer_id;
+---Count the number of orders per customer.
+   SELECT customers.customer_id,Count(Orders.customer_id) as NumberOfOrders,first_name||' '|| last_name as full_name,age,country
+   FROM Customers 
+   JOIN Orders ON Customers.customer_id = Orders.customer_id
+   Group by orders.customer_id;
+---Count the number of shipments per country.
+   SELECT customers.customer_id,Count(shippings.customer) as shipments ,first_name||' '|| last_name as full_name,country
+   FROM Customers 
+   JOIN Shippings ON Customers.customer_id = shippings.customer
+   Group by country;
+Find average order amount for each country.
+
+Show max and min order amount per customer.
+
+Which country has the highest total order amount?
+
+List customers who placed more than 3 orders.
+
+Find customers whose total order amount is above 1000.
+
+Show the number of orders for customers aged under 25.
+
+Rank countries by total shipment count.
+
+🔹 Section 4: Subqueries
+Find customers who placed the highest single order.
+
+Show customers who have never placed an order.
+
+Find orders whose amount is above average.
+
+Get customers whose total order amount is below the overall average.
+
+Show customers who made orders but no shipment exists.
+
+Find the top 3 highest order amounts per customer.
+
+Show customers who made more orders than the average number of orders.
+
+Get customers who only ordered a specific item (e.g., "Laptop").
+
+Display orders made by customers from the country with the most orders.
+
+Show customers whose total shipment count is higher than the average.
+
+🔹 Section 5: Window Functions
+Rank orders by amount for each customer.
+
+Find the running total of order amount per customer.
+
+Show the percent rank of each order per customer.
+
+Get the first order placed by each customer.
+
+Find the order with the highest amount per customer using window function.
+
+List orders along with difference from customer's average order.
+
+Show customers and their rank by total order amount.
+
+Display cumulative shipments per country.
+
+Find the most recent shipment per customer using ROW_NUMBER().
+
+Rank countries by number of active customers (with orders or shipments).
+
+🔹 Section 6: Conditional Logic (CASE WHEN)
+Add a column that labels order as "High", "Medium", or "Low" based on amount.
+
+Flag customers as "Active" if they have orders or shipments.
+
+Label shipping statuses as "In Progress" or "Complete".
+
+Show customer age groups as "Young", "Adult", "Senior".
+
+Display customers and classify their spending level.
+
+🔹 Section 7: Set Operations
+Find customers who are in both orders and shipments (INTERSECT).
+
+Find customers who placed orders but have no shipments (EXCEPT / MINUS).
+
+Combine all customer IDs from orders and shipments (UNION).
+
+List customers who are only in Orders or only in Shippings (not both).
+
+Show common customers with the same ID in both tables.
+
+🔹 Section 8: NULL Handling
+Show customers with no orders.
+
+Show shipments where status is NULL.
+
+Replace NULL shipment statuses with "Pending".
+
+Count customers with no shipments.
+
+Find average order amount including NULL-safe handling.
+
+🔹 Section 9: DDL / Table Design Concepts
+Write a CREATE TABLE statement for each table.
+
+Add a new column email to the Customers table.
+
+Drop the age column from Customers.
+
+Add a foreign key constraint between Orders and Customers.
+
+Rename the status column in Shippings to shipping_status.
+
+🔹 Section 10: DML – INSERT, UPDATE, DELETE
+--Insert three new customer.
+Insert into Customers 
+(customer_id,first_name,last_name,age,country) 
+values 
+('6','Aditya','Ojha','28','India'),
+('7','Buchan','Pandey','26','India'),
+('8','Raushan','Kumar','30','nepal');
+--Insert an order for an existing customer.
+Insert into Orders 
+(order_id,item,amount,customer_id) 
+values 
+('6','T-shirt','350','6'),                                                 
+('7','Shoes','5000','7'),
+('8','Jeans','2000','8');
+--Update shipping status for a specific customer.
+  Update shippings 
+  set status='Sent' 
+  where shipping_id='2';
+---Delete a customer with no orders or shipments.
+
+DELETE FROM Customers 
+where NOT EXISTS (SELECT 1 FROM Orders WHERE Orders.customer_id=Customers.customer_id)
+AND NOT EXISTS (select 1 FROM Shippings WHERE shipments.customer=Customers.customer_id);
+Increase all order amounts by 10%.
+
+--Cancel all shipments with status "Delayed".
+ Update Shippings set status='Cancel' where status ='Delayed'
+--Insert multiple orders in a single query.
+ Insert into Orders 
+(order_id,item,amount,customer_id) 
+values 
+(6,'T-shirt',350,3),                                                 
+(7,'Shoes',5000,2),
+(8,'Jeans',2000,1);
+Update the country for all customers whose country is NULL.
+
+--Delete orders with amount = 0.
+Delete from orders where amount=0; 
+
+--Insert a new shipping record for a customer.
+Insert into Shippings(shipping_id,status,customer) values
+(6,'Delayed',6),
+(7,'Cancel',7),
+(8,'Sent',8);
+
+--- column name from customer to customer_id into the shippings table
+Alter table Shippings RENAME customer to customer_id;
+
+--column to add Gemails and set default values "akojha@gmail.com"
+ Alter table Customers add GEmail varchar(255) DEFAULT 'akojha@gmail.com' ;
+--drop Gemail COLUMNS from customers table:
+Alter table Customers drop GEmail;
+
+🔹 Section 11: Advanced CTEs
+Use a CTE to find average order amount and list customers below it.
+
+Use CTE to list top 2 orders per customer.
+
+Create a recursive CTE to simulate a sequence (just for practice).
+
+CTE to list customers with their total orders and total shipments.
+
+Use multiple CTEs to get country-level customer summaries.
+
+🔹 Section 12: Miscellaneous / Combined Logic
+Find the customer who has spent the most overall.
+
+Show item-wise total revenue and most frequent buyers.
+
+List top 5 customers by total number of orders.
+
+Find customers who placed the same order item more than once.
+
+Show percentage of total revenue contributed by each customer.
+
+List all customers who have the same first name.
+
+Find duplicate shipments for the same customer.
+
+Get all customers who have never had a "Cancelled" shipment.
+
+Find the customer with the longest name.
+
+Show average age of customers who placed at least one order.
+
+Create a report showing customer, total orders, total shipments.
+
+List countries with no customers having any orders.
+
+Count the number of customers per age bracket (e.g., <25, 25–40, >40).
+
+Show customer order history sorted by date (if date added later).
+
+Build a full report of each customer: name, country, total orders, total amount, total shipments.
